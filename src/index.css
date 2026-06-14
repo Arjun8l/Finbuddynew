@@ -1144,3 +1144,41 @@ input { color-scheme: dark; }
   transform: translateY(-1px);
   box-shadow: var(--shadow-sm);
 }
+/* ══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE
+══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .main-area {
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  .health-sidebar {
+    width: 100%;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    flex-shrink: 1;
+  }
+
+  .content {
+    padding: 20px 16px;
+    overflow-y: visible;
+  }
+
+  .navbar {
+    padding: 0 16px;
+    flex-wrap: wrap;
+    height: auto;
+    gap: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .module-container {
+    max-width: 100%;
+  }
+
+  .module-container h2 {
+    font-size: 1.15rem;
+  }
+}
