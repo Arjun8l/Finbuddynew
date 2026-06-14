@@ -1321,32 +1321,52 @@ input { color-scheme: dark; }
     justify-content: center;
     align-items: center;
     gap: 4px;
-    width: 36px;
-    height: 36px;
-    background: var(--graphite);
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(145deg, var(--graphite), var(--obsidian));
     border: 1px solid var(--border-mid);
-    border-radius: var(--r-sm);
+    border-radius: var(--r-md);
     cursor: pointer;
     padding: 0;
     flex-shrink: 0;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 0 0 0 rgba(255,255,255,0);
+    transition: all 0.25s var(--ease);
+  }
+
+  .nav-hamburger:active {
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 0 16px rgba(255,255,255,0.12);
+    border-color: var(--border-hi);
   }
 
   .nav-hamburger span {
     display: block;
-    width: 16px;
+    width: 17px;
     height: 2px;
     background: var(--chalk);
     border-radius: 2px;
-    transition: all 0.2s var(--ease);
+    transition: all 0.25s var(--ease);
+    box-shadow: 0 0 6px rgba(255,255,255,0.15);
+  }
+
+  .nav-hamburger span:nth-child(2) {
+    width: 11px;
+    align-self: flex-start;
+    margin-left: 11px;
   }
 
   /* ── Drawer overlay ────────────────────────────────────── */
   .drawer-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.55);
-    backdrop-filter: blur(2px);
+    background: rgba(5,5,8,0.65);
+    backdrop-filter: blur(6px) saturate(140%);
     z-index: 200;
+    animation: drawer-fade-in 0.25s var(--ease);
+  }
+
+  @keyframes drawer-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 
   /* ── Slide-in drawer ───────────────────────────────────── */
@@ -1355,17 +1375,34 @@ input { color-scheme: dark; }
     top: 0;
     right: 0;
     height: 100vh;
-    width: 78vw;
-    max-width: 300px;
-    background: var(--ink);
-    border-left: 1px solid var(--border-mid);
-    box-shadow: var(--shadow-lg);
+    width: 80vw;
+    max-width: 310px;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(255,255,255,0.05) 0%, transparent 45%),
+      linear-gradient(165deg, #131316 0%, #0a0a0c 60%);
+    border-left: 1px solid var(--border-hi);
+    box-shadow:
+      -8px 0 40px rgba(0,0,0,0.7),
+      -1px 0 0 rgba(255,255,255,0.06),
+      inset 1px 0 0 rgba(255,255,255,0.02);
     z-index: 201;
     display: flex;
     flex-direction: column;
-    padding: 20px;
+    padding: 24px 18px;
     transform: translateX(100%);
-    transition: transform 0.28s var(--ease-out);
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    position: fixed;
+  }
+
+  .nav-drawer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(180deg, transparent, var(--mist), transparent);
+    opacity: 0.4;
   }
 
   .nav-drawer.open {
@@ -1376,7 +1413,14 @@ input { color-scheme: dark; }
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 28px;
+    margin-bottom: 32px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .drawer-header .nav-brand {
+    font-size: 1.05rem;
+    letter-spacing: 0.02em;
   }
 
   .drawer-close {
@@ -1385,47 +1429,78 @@ input { color-scheme: dark; }
     color: var(--chalk);
     width: 32px;
     height: 32px;
-    border-radius: var(--r-sm);
+    border-radius: 50%;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.2s var(--ease);
+  }
+
+  .drawer-close:active {
+    transform: rotate(90deg);
+    border-color: var(--danger);
+    color: #ff6b6b;
   }
 
   .drawer-tabs {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 10px;
   }
 
   .drawer-tab {
     display: flex;
     align-items: center;
-    background: none;
+    gap: 4px;
+    background: rgba(255,255,255,0.02);
     border: 1px solid var(--border);
     color: var(--silver);
-    padding: 13px 16px;
+    padding: 14px 16px;
     border-radius: var(--r-md);
     cursor: pointer;
-    font-size: 0.92rem;
-    font-weight: 500;
-    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    font-family: 'Space Grotesk', sans-serif;
     text-align: left;
-    transition: all 0.2s var(--ease);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: all 0.25s var(--ease);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .drawer-tab span {
+    font-size: 1rem !important;
+    opacity: 1 !important;
+    filter: drop-shadow(0 0 4px rgba(255,255,255,0.15));
   }
 
   .drawer-tab.active {
-    background: var(--pure);
-    color: var(--obsidian);
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+    color: var(--pure);
     font-weight: 700;
-    border-color: var(--pure);
+    border-color: rgba(255,255,255,0.35);
+    box-shadow: inset 0 0 24px rgba(255,255,255,0.06), 0 0 18px rgba(255,255,255,0.08);
   }
 
-  .drawer-tab:not(.active):hover {
+  .drawer-tab.active::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--pure), transparent);
+    box-shadow: 0 0 12px var(--pure);
+  }
+
+  .drawer-tab:not(.active):active {
     border-color: var(--border-hi);
     color: var(--chalk);
-    background: var(--graphite);
+    background: rgba(255,255,255,0.05);
+    transform: scale(0.98);
   }
 
   .drawer-profile {
@@ -1434,21 +1509,40 @@ input { color-scheme: dark; }
     border-top: 1px solid var(--border);
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
   }
 
   .drawer-username {
-    font-size: 0.85rem;
-    color: var(--silver);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.78rem;
+    color: var(--mist);
     font-family: 'Space Grotesk', sans-serif;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.06em;
     word-break: break-all;
+    text-transform: uppercase;
+  }
+
+  .drawer-username::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 8px var(--success), 0 0 16px rgba(0,214,143,0.4);
   }
 
   .drawer-signout {
     width: 100%;
     text-align: center;
-    padding: 11px 14px;
+    padding: 12px 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.74rem;
+    font-weight: 700;
   }
 }
 
