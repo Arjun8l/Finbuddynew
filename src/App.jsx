@@ -125,6 +125,9 @@ function App() {
       updated_at: new Date(),
     }).eq('user_id', userId);
 
+    console.log('WA CATS:', JSON.stringify(waCats));
+    console.log('SYNC RESULT:', JSON.stringify(updated));
+
     return updated;
   }
 
