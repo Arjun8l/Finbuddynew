@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getSavingsRate, getHealthStatus } from '../utils/financeHelpers';
 
 const tips = [
@@ -16,6 +16,8 @@ const tips = [
 
 function HealthSidebar({ income, savings, savingsGoal, categories }) {
   const [tipIndex, setTipIndex] = useState(0);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const sidebarRef = useRef(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -24,14 +26,34 @@ function HealthSidebar({ income, savings, savingsGoal, categories }) {
     return () => clearInterval(timer);
   }, []);
 
+  // Close on outside click (mobile only)
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (
+        mobileOpen &&
+        sidebarRef.current &&
+        !sidebarRef.current.contains(e.target) &&
+        !e.target.closest('.health-sidebar-toggle')
+      ) {
+        setMobileOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [mobileOpen]);
+
   const totalSpent   = categories.reduce((s, c) => s + (c.actual || 0), 0);
   const remaining    = income - totalSpent;
   const savingsRate  = getSavingsRate(totalSpent, income);
   const healthStatus = getHealthStatus(savingsRate);
   const goalProgress = savingsGoal > 0 ? Math.min((savings / savingsGoal) * 100, 100) : 0;
 
-  return (
-    <aside className='health-sidebar'>
+  const sidebarContent = (
+    <>
       <h3>Financial Health</h3>
 
       <div className={`health-badge health-${healthStatus.toLowerCase().replace(' ', '-')}`}>
@@ -65,7 +87,40 @@ function HealthSidebar({ income, savings, savingsGoal, categories }) {
         <p className='tip-label'>💡 Tip</p>
         <p className='tip-text'>{tips[tipIndex]}</p>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile toggle button */}
+      <button
+        className='health-sidebar-toggle'
+        onClick={() => setMobileOpen(o => !o)}
+        aria-label='Toggle Financial Health'
+      >
+        ◈
+      </button>
+
+      {/* Mobile backdrop */}
+      {mobileOpen && <div className='health-sidebar-backdrop' onClick={() => setMobileOpen(false)} />}
+
+      {/* Sidebar — desktop always visible, mobile slides in */}
+      <aside
+        ref={sidebarRef}
+        className={`health-sidebar${mobileOpen ? ' mobile-open' : ''}`}
+      >
+        {/* Mobile close button inside panel */}
+        <button
+          className='health-sidebar-close'
+          onClick={() => setMobileOpen(false)}
+          aria-label='Close'
+        >
+          ✕
+        </button>
+
+        {sidebarContent}
+      </aside>
+    </>
   );
 }
 
