@@ -94,9 +94,6 @@ function Navbar({ currentPage, setPage, onLogout, userName }) {
               <button className='mis-popover-action' onClick={onLogout}>
                 Sign out
               </button>
-              <button className='mis-popover-action' onClick={onLogout}>
-                Change account
-              </button>
             </div>
           )}
           <button
