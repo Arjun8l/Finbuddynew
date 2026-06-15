@@ -67,16 +67,22 @@ function App() {
 
     if (!waCats || waCats.length === 0) return currentCategories;
 
+    // Excluded categories are the source of truth — never re-add them
+    const excludedSet = new Set((excluded || []).map(n => n.toLowerCase()));
+
     const existingByName = new Map(
       currentCategories.map(c => [c.name.toLowerCase(), c])
     );
 
     let changed = false;
     const updated = [...currentCategories];
-    const toAdd = [];
 
     waCats.forEach(wc => {
       const key = wc.name.toLowerCase();
+
+      // Skip any category the user has explicitly removed from the web
+      if (excludedSet.has(key)) return;
+
       const existing = existingByName.get(key);
       const waBudget = Number(wc.budget) || 0;
 
@@ -90,7 +96,7 @@ function App() {
         }
       } else {
         // New category added via WhatsApp
-        toAdd.push({
+        updated.push({
           id: Date.now() + Math.random(),
           name: wc.name,
           icon: wc.icon || '📦',
@@ -98,35 +104,17 @@ function App() {
           recommended: 0,
           actual: 0,
         });
+        changed = true;
       }
     });
 
-    if (toAdd.length > 0) {
-      updated.push(...toAdd);
-      changed = true;
-    }
-
     if (!changed) return currentCategories;
-
-    // Remove any newly-added category names from the exclusion list
-    // (user re-added it intentionally via WhatsApp).
-    const reAddedNames = new Set(toAdd.map(c => c.name.toLowerCase()));
-    const newExcluded = (excluded || []).filter(n => !reAddedNames.has(n.toLowerCase()));
-    if (newExcluded.length !== (excluded || []).length) {
-      setExcludedCategories(newExcluded);
-      await supabase.from('budgets').update({
-        excluded_categories: newExcluded,
-      }).eq('user_id', userId);
-    }
 
     // Save merged/updated categories back to the budget
     await supabase.from('budgets').update({
       categories: updated,
       updated_at: new Date(),
     }).eq('user_id', userId);
-
-    console.log('WA CATS:', JSON.stringify(waCats));
-    console.log('SYNC RESULT:', JSON.stringify(updated));
 
     return updated;
   }
