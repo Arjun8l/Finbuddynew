@@ -151,7 +151,7 @@ function App() {
   }, []);
 
   async function saveBudget(data) {
-    const { error } = await supabase.from('budgets').upsert({
+    const payload = {
       user_id: user.id,
       income: data.income,
       savings: data.savings,
@@ -159,7 +159,12 @@ function App() {
       categories: data.categories,
       excluded_categories: data.excludedCategories ?? excludedCategories,
       updated_at: new Date()
-    }, { onConflict: 'user_id' });
+    };
+    console.log('DEBUG saveBudget payload:', payload);
+
+    const { error } = await supabase.from('budgets').upsert(payload, { onConflict: 'user_id' });
+
+    console.log('DEBUG saveBudget error:', error);
 
     if (error) {
       console.log('Save error:', error.message);
