@@ -236,12 +236,16 @@ function App() {
         .eq('id', user.id)
         .single();
 
+      console.log('DEBUG remove - profile:', profile, 'removing name:', removed.name);
+
       if (profile?.phone) {
-        await supabase
+        const { error, count } = await supabase
           .from('user_categories')
           .delete()
           .eq('phone', profile.phone)
           .ilike('name', removed.name);
+
+        console.log('DEBUG remove - delete error:', error, 'count:', count);
       }
     }
   }
