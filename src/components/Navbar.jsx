@@ -2,7 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 
 function Navbar({ currentPage, setPage, onLogout, userName }) {
   const [accountOpen, setAccountOpen] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const accountRef = useRef(null);
+  const sidebarRef = useRef(null);
 
   const tabs = [
     { id: 'budget',   label: 'Budget',   icon: '◻' },
@@ -21,6 +23,14 @@ function Navbar({ currentPage, setPage, onLogout, userName }) {
       if (accountRef.current && !accountRef.current.contains(e.target)) {
         setAccountOpen(false);
       }
+      if (
+        mobileSidebarOpen &&
+        sidebarRef.current &&
+        !sidebarRef.current.contains(e.target) &&
+        !e.target.closest('.mis-toggle')
+      ) {
+        setMobileSidebarOpen(false);
+      }
     }
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('touchstart', handleClickOutside);
@@ -28,7 +38,7 @@ function Navbar({ currentPage, setPage, onLogout, userName }) {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
     };
-  }, []);
+  }, [mobileSidebarOpen]);
 
   return (
     <>
@@ -66,8 +76,22 @@ function Navbar({ currentPage, setPage, onLogout, userName }) {
         </div>
       </nav>
 
+      {/* Toggle button - mobile */}
+      <button
+        className='mis-toggle'
+        onClick={() => setMobileSidebarOpen(o => !o)}
+        aria-label='Toggle menu'
+      >
+        ☰
+      </button>
+
+      {/* Backdrop - mobile */}
+      {mobileSidebarOpen && (
+        <div className='mis-backdrop' onClick={() => setMobileSidebarOpen(false)} />
+      )}
+
       {/* Icon + label sidebar - mobile */}
-      <aside className='mobile-icon-sidebar'>
+      <aside ref={sidebarRef} className={`mobile-icon-sidebar${mobileSidebarOpen ? ' mis-open' : ''}`}>
         <div className='mis-brand'>
           <span className='mis-dot' />
           <span className='mis-brand-text'>FinBuddy</span>
@@ -78,7 +102,10 @@ function Navbar({ currentPage, setPage, onLogout, userName }) {
             <button
               key={tab.id}
               className={`mis-tab ${currentPage === tab.id ? 'active' : ''}`}
-              onClick={() => setPage(tab.id)}
+              onClick={() => {
+                setPage(tab.id);
+                setMobileSidebarOpen(false);
+              }}
               aria-label={tab.label}
             >
               <span className='mis-icon'>{tab.icon}</span>
