@@ -204,7 +204,7 @@ function App() {
     saveBudget({ income, savings, savingsGoal, categories: updated });
   }
 
-  function removeCategory(id) {
+  async function removeCategory(id) {
     const removed = categories.find(c => c.id === id);
     const updated = categories.filter(c => c.id !== id);
     setCategories(updated);
@@ -216,6 +216,24 @@ function App() {
     }
 
     saveBudget({ income, savings, savingsGoal, categories: updated, excludedCategories: newExcluded });
+
+    // Also permanently delete from user_categories (in case it was
+    // added via WhatsApp), so it doesn't clutter the database.
+    if (removed) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('phone')
+        .eq('id', user.id)
+        .single();
+
+      if (profile?.phone) {
+        await supabase
+          .from('user_categories')
+          .delete()
+          .eq('phone', profile.phone)
+          .ilike('name', removed.name);
+      }
+    }
   }
 
   async function handleLogout() {
