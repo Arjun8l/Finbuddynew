@@ -1,4 +1,9 @@
+import { useState, useRef, useEffect } from 'react';
+
 function Navbar({ currentPage, setPage, onLogout, userName }) {
+  const [accountOpen, setAccountOpen] = useState(false);
+  const accountRef = useRef(null);
+
   const tabs = [
     { id: 'budget',   label: 'Budget',   icon: '◻' },
     { id: 'tracker',  label: 'Tracker',  icon: '◈' },
@@ -10,6 +15,20 @@ function Navbar({ currentPage, setPage, onLogout, userName }) {
     : '';
 
   const initial = displayName ? displayName.charAt(0).toUpperCase() : '?';
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (accountRef.current && !accountRef.current.contains(e.target)) {
+        setAccountOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, []);
 
   return (
     <>
@@ -47,10 +66,11 @@ function Navbar({ currentPage, setPage, onLogout, userName }) {
         </div>
       </nav>
 
-      {/* Icon-only sidebar - mobile */}
+      {/* Icon + label sidebar - mobile */}
       <aside className='mobile-icon-sidebar'>
         <div className='mis-brand'>
           <span className='mis-dot' />
+          <span className='mis-brand-text'>FinBuddy</span>
         </div>
 
         <div className='mis-tabs'>
@@ -60,24 +80,32 @@ function Navbar({ currentPage, setPage, onLogout, userName }) {
               className={`mis-tab ${currentPage === tab.id ? 'active' : ''}`}
               onClick={() => setPage(tab.id)}
               aria-label={tab.label}
-              title={tab.label}
             >
               <span className='mis-icon'>{tab.icon}</span>
+              <span className='mis-label'>{tab.label}</span>
             </button>
           ))}
         </div>
 
-        <div className='mis-footer'>
-          <div className='mis-avatar' title={displayName}>
-            {initial}
-          </div>
+        <div className='mis-footer' ref={accountRef}>
+          {accountOpen && (
+            <div className='mis-account-popover'>
+              <div className='mis-popover-name'>{displayName}</div>
+              <button className='mis-popover-action' onClick={onLogout}>
+                Sign out
+              </button>
+              <button className='mis-popover-action' onClick={onLogout}>
+                Change account
+              </button>
+            </div>
+          )}
           <button
-            className='mis-signout'
-            onClick={onLogout}
-            aria-label='Sign out'
-            title='Sign out'
+            className='mis-account-btn'
+            onClick={() => setAccountOpen(o => !o)}
+            aria-label='Account'
           >
-            ⏻
+            <span className='mis-avatar'>{initial}</span>
+            <span className='mis-label'>Account</span>
           </button>
         </div>
       </aside>

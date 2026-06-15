@@ -1279,8 +1279,8 @@ input { color-scheme: dark; }
   .main-area {
     flex-direction: column !important;
     overflow: visible !important;
-    width: calc(100% - 60px);
-    margin-left: 60px;
+    width: calc(100% - 150px);
+    margin-left: 150px;
     min-height: 100vh;
   }
 
@@ -1309,13 +1309,13 @@ input { color-scheme: dark; }
     font-size: 1.15rem;
   }
 
-  /* ── Always-visible icon sidebar ───────────────────────── */
+  /* ── Always-visible icon+label sidebar ─────────────────── */
   .mobile-icon-sidebar {
     position: fixed;
     top: 0;
     left: 0;
     height: 100vh;
-    width: 60px;
+    width: 150px;
     background:
       radial-gradient(circle at 0% 0%, rgba(255,255,255,0.05) 0%, transparent 50%),
       linear-gradient(180deg, #131316 0%, #0a0a0c 60%);
@@ -1323,21 +1323,31 @@ input { color-scheme: dark; }
     box-shadow: 4px 0 30px rgba(0,0,0,0.6), 1px 0 0 rgba(255,255,255,0.05);
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     z-index: 150;
-    padding: 18px 0;
+    padding: 18px 12px;
+    box-sizing: border-box;
   }
 
   .mis-brand {
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 9px;
     margin-bottom: 28px;
+    padding: 0 4px;
+  }
+
+  .mis-brand-text {
+    font-weight: 800;
+    font-size: 0.92rem;
+    letter-spacing: 0.02em;
+    color: var(--chalk);
   }
 
   .mis-dot {
     width: 9px;
     height: 9px;
+    flex-shrink: 0;
     border-radius: 50%;
     background: var(--pure);
     box-shadow: 0 0 10px rgba(255,255,255,0.7), 0 0 22px rgba(255,255,255,0.3);
@@ -1352,28 +1362,38 @@ input { color-scheme: dark; }
   .mis-tabs {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 10px;
     flex: 1;
   }
 
   .mis-tab {
-    width: 40px;
-    height: 40px;
+    width: 100%;
+    height: 44px;
     border-radius: var(--r-md);
     border: 1px solid var(--border);
     background: rgba(255,255,255,0.02);
     color: var(--silver);
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: 12px;
+    padding: 0 12px;
     cursor: pointer;
     transition: all 0.25s var(--ease);
     position: relative;
   }
 
   .mis-icon {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
+    flex-shrink: 0;
     filter: drop-shadow(0 0 4px rgba(255,255,255,0.1));
+  }
+
+  .mis-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
   }
 
   .mis-tab.active {
@@ -1386,11 +1406,11 @@ input { color-scheme: dark; }
   .mis-tab.active::before {
     content: '';
     position: absolute;
-    left: -10px;
+    left: -13px;
     top: 50%;
     transform: translateY(-50%);
     width: 3px;
-    height: 18px;
+    height: 22px;
     border-radius: 2px;
     background: var(--pure);
     box-shadow: 0 0 10px var(--pure), 0 0 20px var(--pure);
@@ -1400,22 +1420,42 @@ input { color-scheme: dark; }
     border-color: var(--border-hi);
     color: var(--chalk);
     background: rgba(255,255,255,0.06);
-    transform: scale(0.95);
+    transform: scale(0.98);
   }
 
+  /* ── Account button + popover ──────────────────────────── */
   .mis-footer {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
+    position: relative;
     padding-top: 14px;
     border-top: 1px solid var(--border);
     width: 100%;
   }
 
+  .mis-account-btn {
+    width: 100%;
+    height: 48px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+    color: var(--silver);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 10px;
+    cursor: pointer;
+    transition: all 0.25s var(--ease);
+  }
+
+  .mis-account-btn:active {
+    border-color: var(--border-hi);
+    background: rgba(255,255,255,0.06);
+    transform: scale(0.98);
+  }
+
   .mis-avatar {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--slate), var(--graphite));
     border: 1px solid var(--border-mid);
@@ -1423,7 +1463,7 @@ input { color-scheme: dark; }
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.78rem;
+    font-size: 0.74rem;
     font-weight: 700;
     font-family: 'Space Grotesk', sans-serif;
     position: relative;
@@ -1442,25 +1482,58 @@ input { color-scheme: dark; }
     box-shadow: 0 0 6px var(--success);
   }
 
-  .mis-signout {
-    width: 36px;
-    height: 36px;
+  .mis-account-popover {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    width: 100%;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(255,255,255,0.06) 0%, transparent 50%),
+      linear-gradient(165deg, #161618 0%, #0c0c0e 70%);
+    border: 1px solid var(--border-hi);
     border-radius: var(--r-md);
-    border: 1px solid rgba(255,59,59,0.25);
-    background: rgba(255,59,59,0.06);
-    color: #ff6b6b;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+    padding: 10px;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.25s var(--ease);
+    flex-direction: column;
+    gap: 6px;
+    animation: mis-pop-in 0.18s var(--ease-out);
   }
 
-  .mis-signout:active {
-    background: var(--danger);
-    color: #fff;
-    border-color: var(--danger);
-    box-shadow: 0 0 14px rgba(255,59,59,0.4);
+  @keyframes mis-pop-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .mis-popover-name {
+    font-size: 0.72rem;
+    color: var(--mist);
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 4px 8px 8px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2px;
+    word-break: break-all;
+  }
+
+  .mis-popover-action {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    color: var(--silver);
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: 'Space Grotesk', sans-serif;
+    padding: 9px 8px;
+    border-radius: var(--r-sm);
+    cursor: pointer;
+    transition: all 0.2s var(--ease);
+  }
+
+  .mis-popover-action:active {
+    background: rgba(255,59,59,0.08);
+    color: #ff6b6b;
   }
 }
