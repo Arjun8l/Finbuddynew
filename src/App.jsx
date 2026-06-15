@@ -51,18 +51,22 @@ function App() {
   // Pull in any categories added via WhatsApp ("add category X") and
   // merge them into the existing categories list, avoiding duplicates.
   async function syncWhatsappCategories(userId, currentCategories, excluded = excludedCategories) {
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('phone')
       .eq('id', userId)
       .single();
 
+    console.log('DEBUG profile:', profile, 'error:', profileError);
+
     if (!profile?.phone) return currentCategories;
 
-    const { data: newCats } = await supabase
+    const { data: newCats, error: catsError } = await supabase
       .from('user_categories')
       .select('*')
       .eq('phone', profile.phone);
+
+    console.log('DEBUG newCats:', newCats, 'error:', catsError);
 
     if (!newCats || newCats.length === 0) return currentCategories;
 
@@ -70,6 +74,9 @@ function App() {
       currentCategories.map(c => c.name.toLowerCase())
     );
     const excludedSet = new Set((excluded || []).map(n => n.toLowerCase()));
+
+    console.log('DEBUG existingNames:', [...existingNames]);
+    console.log('DEBUG excludedSet:', [...excludedSet]);
 
     const toAdd = newCats
       .filter(nc => !existingNames.has(nc.name.toLowerCase()))
@@ -82,6 +89,8 @@ function App() {
         recommended: 0,
         actual: 0,
       }));
+
+    console.log('DEBUG toAdd:', toAdd);
 
     if (toAdd.length === 0) return currentCategories;
 
