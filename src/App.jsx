@@ -48,8 +48,9 @@ function App() {
     }
   }
 
-  // Pull in any categories added via WhatsApp ("add category X") and
-  // merge them into the existing categories list, avoiding duplicates.
+  // Pull in any categories added/updated via WhatsApp ("add category X" /
+  // "set budget X 2000") and merge them into the existing categories list,
+  // avoiding duplicates and updating budgets for existing categories.
   async function syncWhatsappCategories(userId, currentCategories, excluded = excludedCategories) {
     const { data: profile } = await supabase
       .from('profiles')
@@ -59,33 +60,56 @@ function App() {
 
     if (!profile?.phone) return currentCategories;
 
-    const { data: newCats } = await supabase
+    const { data: waCats } = await supabase
       .from('user_categories')
       .select('*')
       .eq('phone', profile.phone);
 
-    if (!newCats || newCats.length === 0) return currentCategories;
+    if (!waCats || waCats.length === 0) return currentCategories;
 
-    const existingNames = new Set(
-      currentCategories.map(c => c.name.toLowerCase())
+    const existingByName = new Map(
+      currentCategories.map(c => [c.name.toLowerCase(), c])
     );
 
-    // Categories newly added via WhatsApp that match an excluded name
-    // should be "un-excluded" and re-added (user re-added it intentionally).
-    const toAdd = newCats
-      .filter(nc => !existingNames.has(nc.name.toLowerCase()))
-      .map(nc => ({
-        id: Date.now() + Math.random(),
-        name: nc.name,
-        icon: nc.icon || '📦',
-        budget: Number(nc.budget) || 0,
-        recommended: 0,
-        actual: 0,
-      }));
+    let changed = false;
+    const updated = [...currentCategories];
+    const toAdd = [];
 
-    if (toAdd.length === 0) return currentCategories;
+    waCats.forEach(wc => {
+      const key = wc.name.toLowerCase();
+      const existing = existingByName.get(key);
+      const waBudget = Number(wc.budget) || 0;
 
-    // Remove any re-added category names from the exclusion list
+      if (existing) {
+        // Existing category — update budget if it changed (e.g. via
+        // "set budget X 2000" from WhatsApp)
+        if (existing.budget !== waBudget) {
+          const idx = updated.findIndex(c => c.name.toLowerCase() === key);
+          updated[idx] = { ...updated[idx], budget: waBudget };
+          changed = true;
+        }
+      } else {
+        // New category added via WhatsApp
+        toAdd.push({
+          id: Date.now() + Math.random(),
+          name: wc.name,
+          icon: wc.icon || '📦',
+          budget: waBudget,
+          recommended: 0,
+          actual: 0,
+        });
+      }
+    });
+
+    if (toAdd.length > 0) {
+      updated.push(...toAdd);
+      changed = true;
+    }
+
+    if (!changed) return currentCategories;
+
+    // Remove any newly-added category names from the exclusion list
+    // (user re-added it intentionally via WhatsApp).
     const reAddedNames = new Set(toAdd.map(c => c.name.toLowerCase()));
     const newExcluded = (excluded || []).filter(n => !reAddedNames.has(n.toLowerCase()));
     if (newExcluded.length !== (excluded || []).length) {
@@ -95,15 +119,13 @@ function App() {
       }).eq('user_id', userId);
     }
 
-    const merged = [...currentCategories, ...toAdd];
-
-    // Save merged categories back to the budget
+    // Save merged/updated categories back to the budget
     await supabase.from('budgets').update({
-      categories: merged,
+      categories: updated,
       updated_at: new Date(),
     }).eq('user_id', userId);
 
-    return merged;
+    return updated;
   }
 
   useEffect(() => {
